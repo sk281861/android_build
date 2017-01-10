@@ -97,19 +97,12 @@ Usage:  ota_from_target_files [flags] input_target_files output_ota_package
       Enable or disable the execution of backuptool.sh.
       Disabled by default.
 
-  --override_device <device>
-      Override device-specific asserts. Can be a comma-separated list.
-
-  --override_prop <boolean>
-      Override build.prop items with custom vendor init.
-      Enabled when TARGET_UNIFIED_DEVICE is defined in BoardConfig
-
   --log_diff <file>
       Generate a log file that shows the differences in the source and target
       builds for an incremental package. This option is only meaningful when
       -i is specified.
 
-  --payload_signer <signer>
+]  --payload_signer <signer>
       Specify the signer when signing the payload and metadata for A/B OTAs.
       By default (i.e. without this flag), it calls 'openssl pkeyutl' to sign
       with the package private key. If the private key cannot be accessed
@@ -1992,10 +1985,6 @@ def main(argv):
       OPTIONS.log_diff = a
     elif o in ("--backup",):
       OPTIONS.backuptool = bool(a.lower() == 'true')
-    elif o in ("--override_device",):
-      OPTIONS.override_device = a
-    elif o in ("--override_prop",):
-      OPTIONS.override_prop = bool(a.lower() == 'true')
     elif o == "--payload_signer":
       OPTIONS.payload_signer = a
     elif o == "--payload_signer_args":
@@ -2028,8 +2017,6 @@ def main(argv):
                                  "gen_verify",
                                  "log_diff=",
                                  "backup=",
-                                 "override_device=",
-                                 "override_prop=",
                                  "payload_signer=",
                                  "payload_signer_args=",
                              ], extra_option_handler=option_handler)
@@ -2037,6 +2024,49 @@ def main(argv):
   if len(args) != 2:
     common.Usage(__doc__)
     sys.exit(1)
+
+  if OPTIONS.downgrade:
+    # Sanity check to enforce a data wipe.
+    if not OPTIONS.wipe_user_data:
+      raise ValueError("Cannot downgrade without a data wipe")
+
+    # We should only allow downgrading incrementals (as opposed to full).
+    # Otherwise the device may go back from arbitrary build with this full
+    # OTA package.
+    if OPTIONS.incremental_source is None:
+      raise ValueError("Cannot generate downgradable full OTAs - consider"
+                       "using --omit_prereq?")
+
+  # Load the dict file from the zip directly to have a peek at the OTA type.
+  # For packages using A/B update, unzipping is not needed.
+  input_zip = zipfile.ZipFile(args[0], "r")
+  OPTIONS.info_dict = common.LoadInfoDict(input_zip)
+  common.ZipClose(input_zip)
+
+  ab_update = OPTIONS.info_dict.get("ab_update") == "true"
+
+  if ab_update:
+    if OPTIONS.incremental_source is not None:
+      OPTIONS.target_info_dict = OPTIONS.info_dict
+      source_zip = zipfile.ZipFile(OPTIONS.incremental_source, "r")
+      OPTIONS.source_info_dict = common.LoadInfoDict(source_zip)
+      common.ZipClose(source_zip)
+
+    if OPTIONS.verbose:
+      print("--- target info ---")
+      common.DumpInfoDict(OPTIONS.info_dict)
+
+      if OPTIONS.incremental_source is not None:
+        print("--- source info ---")
+        common.DumpInfoDict(OPTIONS.source_info_dict)
+
+    WriteABOTAPackageWithBrilloScript(
+        target_file=args[0],
+        output_file=args[1],
+        source_file=OPTIONS.incremental_source)
+
+    print("done.")
+    return
 
   if OPTIONS.extra_script is not None:
     OPTIONS.extra_script = open(OPTIONS.extra_script).read()

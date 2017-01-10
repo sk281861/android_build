@@ -2147,8 +2147,9 @@ ifdef PRODUCT_DEFAULT_DEV_CERTIFICATE
 else
 	$(hide) build/tools/getb64key.py $(DEFAULT_SYSTEM_DEV_CERTIFICATE).x509.pem > $(zip_root)/META/releasekey.txt
 endif
-
-ifdef BOARD_PREBUILT_VENDORIMAGE
+	$(hide) echo "ota_override_device=$(OTA_SCRIPT_OVERRIDE_DEVICE)" >> $(zip_root)/META/misc_info.txt
+	$(hide) echo "ota_override_prop=$(OTA_SCRIPT_OVERRIDE_PROP)" >> $(zip_root)/META/misc_info.txt
+# ifdef BOARD_PREBUILT_VENDORIMAGE
 	$(hide) mkdir -p $(zip_root)/IMAGES
 	$(hide) cp $(INSTALLED_VENDORIMAGE_TARGET) $(zip_root)/IMAGES/
 endif
@@ -2215,15 +2216,15 @@ endif
 endif
 
 ifeq ($(TARGET_OTA_ASSERT_DEVICE),)
-    $(INTERNAL_OTA_PACKAGE_TARGET): override_device := auto
+    OTA_SCRIPT_OVERRIDE_DEVICE := auto
 else
-    $(INTERNAL_OTA_PACKAGE_TARGET): override_device := $(TARGET_OTA_ASSERT_DEVICE)
+    OTA_SCRIPT_OVERRIDE_DEVICE := $(TARGET_OTA_ASSERT_DEVICE)
 endif
 
 ifneq ($(TARGET_UNIFIED_DEVICE),)
-    $(INTERNAL_OTA_PACKAGE_TARGET): override_prop := --override_prop=true
+    OTA_SCRIPT_OVERRIDE_PROP := true
     ifeq ($(TARGET_OTA_ASSERT_DEVICE),)
-        $(INTERNAL_OTA_PACKAGE_TARGET): override_device := $(TARGET_DEVICE)
+        OTA_SCRIPT_OVERRIDE_DEVICE := $(TARGET_OTA_ASSERT_DEVICE)
     endif
 endif
 
@@ -2233,7 +2234,6 @@ endif
 
 $(INTERNAL_OTA_PACKAGE_TARGET): $(BUILT_TARGET_FILES_PACKAGE)
 	@echo "$(OTA_FROM_TARGET_SCRIPT)" > $(PRODUCT_OUT)/ota_script_path
-	@echo "$(override_device)" > $(PRODUCT_OUT)/ota_override_device
 	@echo -e ${CL_PFX}"Package OTA:"${CL_RST}" $@"
 
 $(INTERNAL_OTA_PACKAGE_TARGET): $(BUILT_TARGET_FILES_PACKAGE)
@@ -2244,9 +2244,6 @@ $(INTERNAL_OTA_PACKAGE_TARGET): $(BUILT_TARGET_FILES_PACKAGE)
 	   -p $(HOST_OUT) \
 	   -k $(KEY_CERT_PAIR) \
 	   --backup=$(backuptool) \
-	   --override_device=$(override_device) $(override_prop) \
-	   $(extra_ota_args) \
-	   --override_device=$(override_device) \
 	   $(if $(OEM_OTA_CONFIG), -o $(OEM_OTA_CONFIG)) \
 	   $(BUILT_TARGET_FILES_PACKAGE) $@
 
