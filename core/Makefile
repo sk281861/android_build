@@ -6,8 +6,6 @@
 # INS: Module "Install:" output color (cyan for ics)
 
 ifneq ($(BUILD_WITH_COLORS),0)
-  CL_PFX="\033[33m"
-  CL_INS="\033[36m"
   CL_RED="\033[31m"
   CL_GRN="\033[32m"
   CL_YLW="\033[33m"
@@ -251,7 +249,7 @@ endif
 	$(hide) TARGET_BUILD_TYPE="$(TARGET_BUILD_VARIANT)" \
 			TARGET_BUILD_FLAVOR="$(TARGET_BUILD_FLAVOR)" \
 			TARGET_DEVICE="$(TARGET_VENDOR_DEVICE_NAME)" \
-			TESLA_DEVICE="$(TARGET_DEVICE)" \
+			CANDY_DEVICE="$(TARGET_DEVICE)" \
 			PRODUCT_NAME="$(TARGET_VENDOR_PRODUCT_NAME)" \
 			PRODUCT_BRAND="$(PRODUCT_BRAND)" \
 			PRODUCT_DEFAULT_LOCALE="$(call get-default-product-locale,$(PRODUCT_LOCALES))" \
@@ -1260,7 +1258,7 @@ FULL_SYSTEMIMAGE_DEPS := $(INTERNAL_SYSTEMIMAGE_FILES) $(INTERNAL_USERIMAGES_DEP
 # system image.
 INSTALLED_FILES_FILE := $(PRODUCT_OUT)/installed-files.txt
 $(INSTALLED_FILES_FILE): $(FULL_SYSTEMIMAGE_DEPS)
-	$(hide) ./vendor/tesla/tools/changelog
+	$(hide) ./vendor/candy/tools/changelog
 	@echo Installed file list: $@
 	@mkdir -p $(dir $@)
 	@rm -f $@
@@ -2191,7 +2189,7 @@ endif
 ifeq ($(WITH_GMS),true)
     $(INTERNAL_OTA_PACKAGE_TARGET): backuptool := false
 else
-ifneq ($(TESLA_BUILD),)
+ifneq ($(CANDY_BUILD),)
     $(INTERNAL_OTA_PACKAGE_TARGET): backuptool := true
 else
     $(INTERNAL_OTA_PACKAGE_TARGET): backuptool := false
@@ -2229,32 +2227,25 @@ $(INTERNAL_OTA_PACKAGE_TARGET): $(BUILT_TARGET_FILES_PACKAGE)
 	   $(if $(OEM_OTA_CONFIG), -o $(OEM_OTA_CONFIG)) \
 	   $(BUILT_TARGET_FILES_PACKAGE) $@
 
-TESLA_TARGET_PACKAGE := $(PRODUCT_OUT)/$(TESLA_MOD_VERSION).zip
+CANDY_TARGET_PACKAGE := $(PRODUCT_OUT)/$(CANDY_MOD_VERSION).zip
 
-.PHONY: otapackage bacon tesla
+.PHONY: otapackage bacon
 otapackage: $(INTERNAL_OTA_PACKAGE_TARGET)
 bacon: otapackage
-	$(hide) ln -f $(INTERNAL_OTA_PACKAGE_TARGET) $(TESLA_TARGET_PACKAGE)
-	$(hide) $(MD5SUM) $(TESLA_TARGET_PACKAGE) > $(TESLA_TARGET_PACKAGE).md5sum
-	@echo "Package Complete: $(TESLA_TARGET_PACKAGE)"
-tesla: otapackage
-	$(hide) ln -f $(INTERNAL_OTA_PACKAGE_TARGET) $(TESLA_TARGET_PACKAGE)
-	$(hide) $(MD5SUM) $(TESLA_TARGET_PACKAGE) > $(TESLA_TARGET_PACKAGE).md5sum
-	@echo -e ${CL_BLU}""${CL_BLU}
-	@echo -e ${CL_BLU}"    ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄            ▄▄▄▄▄▄▄▄▄▄▄ "${CL_BLU}
-	@echo -e ${CL_BLU}"   ▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░▌          ▐░░░░░░░░░░░▌"${CL_BLU}
-	@echo -e ${CL_BLU}"    ▀▀▀▀█░█▀▀▀▀ ▐░█▀▀▀▀▀▀▀▀▀ ▐░█▀▀▀▀▀▀▀▀▀ ▐░▌          ▐░█▀▀▀▀▀▀▀█░▌"${CL_BLU}
-	@echo -e ${CL_BLU}"        ▐░▌     ▐░▌          ▐░▌          ▐░▌          ▐░▌       ▐░▌"${CL_BLU}
-	@echo -e ${CL_BLU}"        ▐░▌     ▐░█▄▄▄▄▄▄▄▄▄ ▐░█▄▄▄▄▄▄▄▄▄ ▐░▌          ▐░█▄▄▄▄▄▄▄█░▌"${CL_BLU}
-	@echo -e ${CL_BLU}"        ▐░▌     ▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░▌          ▐░░░░░░░░░░░▌"${CL_BLU}
-	@echo -e ${CL_BLU}"        ▐░▌     ▐░█▀▀▀▀▀▀▀▀▀  ▀▀▀▀▀▀▀▀▀█░▌▐░▌          ▐░█▀▀▀▀▀▀▀█░▌"${CL_BLU}
-	@echo -e ${CL_BLU}"        ▐░▌     ▐░▌                    ▐░▌▐░▌          ▐░▌       ▐░▌"${CL_BLU}
-	@echo -e ${CL_BLU}"        ▐░▌     ▐░█▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄█░▌▐░█▄▄▄▄▄▄▄▄▄ ▐░▌       ▐░▌"${CL_BLU}
-	@echo -e ${CL_BLU}"        ▐░▌     ▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░░░░░░░░░░░▌▐░▌       ▐░▌"${CL_BLU}
-	@echo -e ${CL_BLU}"         ▀       ▀▀▀▀▀▀▀▀▀▀▀  ▀▀▀▀▀▀▀▀▀▀▀  ▀▀▀▀▀▀▀▀▀▀▀  ▀         ▀ "${CL_BLU}
-	@echo -e ${CL_BLU}"                           A Ground Zero Roms "${CL_BLU}
-	@echo -e ${CL_BLU}"                                Project      "${CL_BLU}
-	@echo -e ${CL_CYN}"Package Complete: $(TESLA_TARGET_PACKAGE)"${CL_RST}
+	$(hide) ln -f $(INTERNAL_OTA_PACKAGE_TARGET) $(CANDY_TARGET_PACKAGE)
+	$(hide) $(MD5SUM) $(CANDY_TARGET_PACKAGE) > $(CANDY_TARGET_PACKAGE).md5sum
+	@echo -e ${CL_YLW}"═══════════════════════════════════════════════════════════════════════════════════"${CL_RST}
+	@echo -e ${CL_YLW}"*"${CL_BLU}"C"${CL_RED}"a"${CL_YLW}"n"${CL_GRN}"d"${CL_BLU}"y"${CL_RED}"7.1"${CL_YLW}"*"${CL_BLU}"C"${CL_RED}"a"${CL_YLW}"n"${CL_GRN}"d"${CL_BLU}"y"${CL_RED}"7.1"${CL_YLW}"*"${CL_BLU}"C"${CL_RED}"a"${CL_YLW}"n"${CL_GRN}"d"${CL_BLU}"y"${CL_RED}"7.1"${CL_YLW}"*"${CL_BLU}"C"${CL_RED}"a"${CL_YLW}"n"${CL_GRN}"d"${CL_BLU}"y"${CL_RED}"7.1"${CL_YLW}"*"${CL_BLU}"C"${CL_RED}"a"${CL_YLW}"n"${CL_GRN}"d"${CL_BLU}"y"${CL_RED}"7.1"${CL_YLW}"*"${CL_BLU}"C"${CL_RED}"a"${CL_YLW}"n"${CL_GRN}"d"${CL_BLU}"y"${CL_RED}"7.1"${CL_YLW}"*"${CL_BLU}"C"${CL_RED}"a"${CL_YLW}"n"${CL_GRN}"d"${CL_BLU}"y"${CL_RED}"7.1"${CL_YLW}"*"${CL_BLU}"C"${CL_RED}"a"${CL_YLW}"n"${CL_GRN}"d"${CL_BLU}"y"${CL_RED}"7.1"${CL_YLW}"*"${CL_BLU}"C"${CL_RED}"a"${CL_YLW}"n"${CL_GRN}"d"${CL_BLU}"y"${CL_RED}"7.1"${CL_YLW}"*"${CL_RST}
+	@echo -e ${CL_YLW}"═══════════════════════════════════════════════════════════════════════════════════"${CL_RST}
+	@echo -e ${CL_BLU}"                     ██████╗"${CL_RED}" █████╗ "${CL_YLW}"███╗   ██╗"${CL_GRN}"██████╗ "${CL_BLU}"██╗   ██╗"${CL_RST}
+	@echo -e ${CL_BLU}"                    ██╔════╝"${CL_RED}"██╔══██╗"${CL_YLW}"████╗  ██║"${CL_GRN}"██╔══██╗"${CL_BLU}"╚██╗ ██╔╝"${CL_RST}
+	@echo -e ${CL_BLU}"                    ██║     "${CL_RED}"███████║"${CL_YLW}"██╔██╗ ██║"${CL_GRN}"██║  ██║"${CL_BLU}" ╚═██╔═╝ "${CL_RST}
+	@echo -e ${CL_BLU}"                    ██║     "${CL_RED}"██╔══██║"${CL_YLW}"██║╚██╗██║"${CL_GRN}"██║  ██║"${CL_BLU}"   ██║   "${CL_RST}
+	@echo -e ${CL_BLU}"                    ╚██████╗"${CL_RED}"██║  ██║"${CL_YLW}"██║ ╚████║"${CL_GRN}"██████╔╝"${CL_BLU}"   ██║   "${CL_RST}
+	@echo -e ${CL_BLU}"                     ╚═════╝"${CL_RED}"╚═╝  ╚═╝"${CL_YLW}"╚═╝  ╚═══╝"${CL_GRN}"╚═════╝ "${CL_BLU}"   ╚═╝   "${CL_RST}
+	@echo -e ${CL_YLW}"═══════════════════════════════════════════════════════════════════════════════════"${CL_RST}
+	@echo -e ${CL_CYN}"$(CANDY_TARGET_PACKAGE)"${CL_RST}
+	@echo -e ${CL_YLW}"═══════════════════════════════════════════════════════════════════════════════════"${CL_RST}
 
 
 endif    # build_ota_package
