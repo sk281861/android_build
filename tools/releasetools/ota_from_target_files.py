@@ -641,13 +641,23 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
   script.Print("Target: %s" % CalculateFingerprint(
       oem_props, oem_dict, OPTIONS.info_dict))
 
+  script.Print("*****************************************");
+  script.Print("*****************************************");
+  script.Print("   ___              _      ___           ");
+  script.Print("  / __|__ _ _ _  __| |_  _| _ \___ _ __  ");
+  script.Print(" | (__/ _` | ' \/ _` | || |   / _ \ '  \ ");
+  script.Print("  \___\__,_|_||_\__,_|\_, |_|_\___/_|_|_|");
+  script.Print("                      |__/               ");
+  script.Print("*****************************************");
+  script.Print("*****************************************");
+
   script.AppendExtra("ifelse(is_mounted(\"/system\"), unmount(\"/system\"));")
   device_specific.FullOTA_InstallBegin()
 
   CopyInstallTools(output_zip)
   script.UnpackPackageDir("install", "/tmp/install")
-  script.SetPermissionsRecursive("/tmp/install", 0, 0, 0o755, 0o644, None, None)
-  script.SetPermissionsRecursive("/tmp/install/bin", 0, 0, 0o755, 0o755, None, None)
+  script.SetPermissionsRecursive("/tmp/install", 0, 0, 0755, 0644, None, None)
+  script.SetPermissionsRecursive("/tmp/install/bin", 0, 0, 0755, 0755, None, None)
 
   if OPTIONS.backuptool:
     script.Mount("/system")
@@ -655,16 +665,6 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
     script.Unmount("/system")
 
   system_progress = 0.75
-
-  script.Print("************************************");
-  script.Print("         _____       _              "); 
-  script.Print("        |_   _|__ __| |__ _         "); 
-  script.Print("          | |/ -_|_-< / _` |        "); 
-  script.Print("          |_|\___/__/_\__,_|        "); 
-  script.Print("                                    "); 
-  script.Print("              AOSP Nougat           "); 
-  script.Print("       A Ground Zero Roms Project   ");
-  script.Print("************************************"); 
 
   if OPTIONS.wipe_user_data:
     system_progress -= 0.1
