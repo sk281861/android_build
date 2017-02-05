@@ -2229,9 +2229,9 @@ $(INTERNAL_OTA_PACKAGE_TARGET): $(BUILT_TARGET_FILES_PACKAGE)
 
 CANDY_TARGET_PACKAGE := $(PRODUCT_OUT)/$(CANDY_MOD_VERSION).zip
 
-.PHONY: otapackage bacon
+.PHONY: otapackage candy
 otapackage: $(INTERNAL_OTA_PACKAGE_TARGET)
-bacon: otapackage
+candy: otapackage
 	$(hide) ln -f $(INTERNAL_OTA_PACKAGE_TARGET) $(CANDY_TARGET_PACKAGE)
 	$(hide) $(MD5SUM) $(CANDY_TARGET_PACKAGE) > $(CANDY_TARGET_PACKAGE).md5sum
 	@echo -e ${CL_YLW}"═══════════════════════════════════════════════════════════════════════════════════"${CL_RST}
