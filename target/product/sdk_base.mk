@@ -14,21 +14,16 @@
 # limitations under the License.
 #
 
-PRODUCT_PROPERTY_OVERRIDES :=
-
 PRODUCT_PACKAGES := \
 	ApiDemos \
 	CustomLocale \
-	Development \
 	Dialer \
 	EmulatorSmokeTests \
 	Fallback \
 	Gallery \
 	GestureBuilder \
-	Launcher3 \
 	LegacyCamera \
 	librs_jni \
-	LiveWallpapersPicker \
 	rild \
 	SdkSetup \
 	SmokeTest \
