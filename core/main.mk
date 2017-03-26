@@ -553,6 +553,11 @@ ifeq ($(USE_SOONG),true)
 subdir_makefiles := $(SOONG_ANDROID_MK) $(call filter-soong-makefiles,$(subdir_makefiles))
 endif
 
+# Disable progress indicator of Android.mk includes if ninja is disabled
+ifeq ($(USE_NINJA),false)
+  VERBOSE_MK_EVAL := false
+endif
+
 ifneq ($(VERBOSE_MK_EVAL),false)
   $(foreach mk, $(subdir_makefiles), \
     $(info [$(call inc_and_print,subdir_makefiles_inc)/$(subdir_makefiles_total)] Including Makefile: $(mk)) \
