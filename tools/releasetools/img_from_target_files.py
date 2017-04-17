@@ -119,7 +119,11 @@ def main(argv):
             continue
           if not image.endswith(".img"):
             continue
+<<<<<<< HEAD
           if i == "oem.img":
+=======
+          if image == "recovery-two-step.img":
+>>>>>>> android-7.1.2_r2
             continue
           common.ZipWrite(
               output_zip, os.path.join(images_path, image), image)
