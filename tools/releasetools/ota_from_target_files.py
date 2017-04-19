@@ -491,11 +491,11 @@ def _WriteRecoveryImageToBoot(script, output_zip):
         OPTIONS.input_tmp, "RECOVERY")
     common.ZipWriteStr(
         output_zip, recovery_two_step_img_name, recovery_two_step_img.data)
-    print "two-step package: using %s in stage 1/3" % (
-        recovery_two_step_img_name,)
+    print("two-step package: using %s in stage 1/3" % (
+        recovery_two_step_img_name,))
     script.WriteRawImage("/boot", recovery_two_step_img_name)
   else:
-    print "two-step package: using recovery.img in stage 1/3"
+    print("two-step package: using recovery.img in stage 1/3")
     # The "recovery.img" entry has been written into package earlier.
     script.WriteRawImage("/boot", "recovery.img")
 
@@ -680,15 +680,15 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
   script.Print("Target: %s" % CalculateFingerprint(
       oem_props, oem_dict, OPTIONS.info_dict))
 
-  script.Print("*****************************************");
-  script.Print("*****************************************");
-  script.Print("   ___              _      ___           ");
-  script.Print("  / __|__ _ _ _  __| |_  _| _ \___ _ __  ");
-  script.Print(" | (__/ _` | ' \/ _` | || |   / _ \ '  \ ");
-  script.Print("  \___\__,_|_||_\__,_|\_, |_|_\___/_|_|_|");
-  script.Print("                      |__/               ");
-  script.Print("*****************************************");
-  script.Print("*****************************************");
+  script.Print("**********************************************");
+  script.Print("**********************************************");
+  script.Print("   ___              _      ___                ");
+  script.Print("  / __|__ _ _ _  __| |_  _| _ \___ _ __  ____ ");
+  script.Print(" | (__/ _` | ' \/ _` | || |   / _ \ '  \( _ / ");
+  script.Print("  \___\__,_|_||_\__,_|\_, |_|_\___/_|_|_/___) ");
+  script.Print("                      |__/                    ");
+  script.Print("**********************************************");
+  script.Print("**********************************************");
 
   script.AppendExtra("ifelse(is_mounted(\"/system\"), unmount(\"/system\"));")
   device_specific.FullOTA_InstallBegin()
