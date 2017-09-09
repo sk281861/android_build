@@ -43,7 +43,7 @@ DEBUG = False
 default_manifest = ".repo/manifest.xml"
 
 custom_local_manifest = ".repo/local_manifests/candy_manifest.xml"
-custom_default_revision = "c7.1.1"
+custom_default_revision = "c7.1.2"
 custom_dependencies = "candy.dependencies"
 org_manifest = "CandyDevices"  # leave empty if org is provided in manifest
 org_display = "CandyDevices"  # needed for displaying
