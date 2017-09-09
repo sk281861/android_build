@@ -67,9 +67,6 @@ Usage:  ota_from_target_files [flags] input_target_files output_ota_package
   -e  (--extra_script)  <file>
       Insert the contents of file at the end of the update script.
 
-  -a  (--aslr_mode)  <on|off>
-      Specify whether to turn on ASLR for the package (on by default).
-
   -2  (--two_step)
       Generate a 'two-step' OTA package, where recovery is updated
       first, so that any changes made to the system partition are done
@@ -97,19 +94,12 @@ Usage:  ota_from_target_files [flags] input_target_files output_ota_package
       Enable or disable the execution of backuptool.sh.
       Disabled by default.
 
-  --override_device <device>
-      Override device-specific asserts. Can be a comma-separated list.
-
-  --override_prop <boolean>
-      Override build.prop items with custom vendor init.
-      Enabled when TARGET_UNIFIED_DEVICE is defined in BoardConfig
-
   --log_diff <file>
       Generate a log file that shows the differences in the source and target
       builds for an incremental package. This option is only meaningful when
       -i is specified.
 
-  --payload_signer <signer>
+]  --payload_signer <signer>
       Specify the signer when signing the payload and metadata for A/B OTAs.
       By default (i.e. without this flag), it calls 'openssl pkeyutl' to sign
       with the package private key. If the private key cannot be accessed
@@ -150,7 +140,6 @@ OPTIONS.patch_threshold = 0.95
 OPTIONS.wipe_user_data = False
 OPTIONS.omit_prereq = False
 OPTIONS.extra_script = None
-OPTIONS.aslr_mode = True
 OPTIONS.worker_threads = multiprocessing.cpu_count() // 2
 if OPTIONS.worker_threads == 0:
   OPTIONS.worker_threads = 1
@@ -650,8 +639,8 @@ def WriteFullOTAPackage(input_zip, output_zip):
   #    complete script normally
   #    (allow recovery to mark itself finished and reboot)
 
-  recovery_img = common.GetBootableImage("recovery.img", "recovery.img",
-                                         OPTIONS.input_tmp, "RECOVERY")
+#  recovery_img = common.GetBootableImage("recovery.img", "recovery.img",
+#                                         OPTIONS.input_tmp, "RECOVERY")
   if OPTIONS.two_step:
     if not OPTIONS.info_dict.get("multistage_support", None):
       assert False, "two-step packages not supported by this build"
@@ -753,8 +742,8 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
       common.ZipWriteStr(output_zip, "recovery/" + fn, data)
       system_items.Get("system/" + fn)
 
-    common.MakeRecoveryPatch(OPTIONS.input_tmp, output_sink,
-                             recovery_img, boot_img)
+#    common.MakeRecoveryPatch(OPTIONS.input_tmp, output_sink,
+#                             recovery_img, boot_img)
 
     system_items.GetMetadata(input_zip)
     system_items.Get("system").SetPermissions(script)
@@ -1618,12 +1607,13 @@ def WriteIncrementalOTAPackage(target_zip, source_zip, output_zip):
   updating_boot = (not OPTIONS.two_step and
                    (source_boot.data != target_boot.data))
 
-  source_recovery = common.GetBootableImage(
-      "/tmp/recovery.img", "recovery.img", OPTIONS.source_tmp, "RECOVERY",
-      OPTIONS.source_info_dict)
-  target_recovery = common.GetBootableImage(
-      "/tmp/recovery.img", "recovery.img", OPTIONS.target_tmp, "RECOVERY")
-  updating_recovery = (source_recovery.data != target_recovery.data)
+#  source_recovery = common.GetBootableImage(
+#      "/tmp/recovery.img", "recovery.img", OPTIONS.source_tmp, "RECOVERY",
+#      OPTIONS.source_info_dict)
+#  target_recovery = common.GetBootableImage(
+#      "/tmp/recovery.img", "recovery.img", OPTIONS.target_tmp, "RECOVERY")
+#  updating_recovery = (source_recovery.data != target_recovery.data)
+  updating_recovery = false
 
   # Here's how we divide up the progress bar:
   #  0.1 for verifying the start state (PatchCheck calls)
@@ -1871,9 +1861,9 @@ else
     script.Print("Unpacking new vendor files...")
     script.UnpackPackageDir("vendor", "/vendor")
 
-  if updating_recovery and not target_has_recovery_patch:
-    script.Print("Unpacking new recovery...")
-    script.UnpackPackageDir("recovery", "/system")
+#  if updating_recovery and not target_has_recovery_patch:
+#    script.Print("Unpacking new recovery...")
+#    script.UnpackPackageDir("recovery", "/system")
 
   system_diff.EmitRenames(script)
   if vendor_diff:
@@ -1957,11 +1947,6 @@ def main(argv):
       OPTIONS.oem_source = a
     elif o in ("-e", "--extra_script"):
       OPTIONS.extra_script = a
-    elif o in ("-a", "--aslr_mode"):
-      if a in ("on", "On", "true", "True", "yes", "Yes"):
-        OPTIONS.aslr_mode = True
-      else:
-        OPTIONS.aslr_mode = False
     elif o in ("-t", "--worker_threads"):
       if a.isdigit():
         OPTIONS.worker_threads = int(a)
@@ -1992,10 +1977,6 @@ def main(argv):
       OPTIONS.log_diff = a
     elif o in ("--backup",):
       OPTIONS.backuptool = bool(a.lower() == 'true')
-    elif o in ("--override_device",):
-      OPTIONS.override_device = a
-    elif o in ("--override_prop",):
-      OPTIONS.override_prop = bool(a.lower() == 'true')
     elif o == "--payload_signer":
       OPTIONS.payload_signer = a
     elif o == "--payload_signer_args":
@@ -2005,7 +1986,7 @@ def main(argv):
     return True
 
   args = common.ParseOptions(argv, __doc__,
-                             extra_opts="b:k:i:d:wne:t:a:2o:",
+                             extra_opts="b:k:i:d:wne:t:2o:",
                              extra_long_opts=[
                                  "board_config=",
                                  "package_key=",
@@ -2016,7 +1997,6 @@ def main(argv):
                                  "no_prereq",
                                  "extra_script=",
                                  "worker_threads=",
-                                 "aslr_mode=",
                                  "two_step",
                                  "no_signing",
                                  "block",
@@ -2028,8 +2008,6 @@ def main(argv):
                                  "gen_verify",
                                  "log_diff=",
                                  "backup=",
-                                 "override_device=",
-                                 "override_prop=",
                                  "payload_signer=",
                                  "payload_signer_args=",
                              ], extra_option_handler=option_handler)
@@ -2037,6 +2015,49 @@ def main(argv):
   if len(args) != 2:
     common.Usage(__doc__)
     sys.exit(1)
+
+  if OPTIONS.downgrade:
+    # Sanity check to enforce a data wipe.
+    if not OPTIONS.wipe_user_data:
+      raise ValueError("Cannot downgrade without a data wipe")
+
+    # We should only allow downgrading incrementals (as opposed to full).
+    # Otherwise the device may go back from arbitrary build with this full
+    # OTA package.
+    if OPTIONS.incremental_source is None:
+      raise ValueError("Cannot generate downgradable full OTAs - consider"
+                       "using --omit_prereq?")
+
+  # Load the dict file from the zip directly to have a peek at the OTA type.
+  # For packages using A/B update, unzipping is not needed.
+  input_zip = zipfile.ZipFile(args[0], "r")
+  OPTIONS.info_dict = common.LoadInfoDict(input_zip)
+  common.ZipClose(input_zip)
+
+  ab_update = OPTIONS.info_dict.get("ab_update") == "true"
+
+  if ab_update:
+    if OPTIONS.incremental_source is not None:
+      OPTIONS.target_info_dict = OPTIONS.info_dict
+      source_zip = zipfile.ZipFile(OPTIONS.incremental_source, "r")
+      OPTIONS.source_info_dict = common.LoadInfoDict(source_zip)
+      common.ZipClose(source_zip)
+
+    if OPTIONS.verbose:
+      print("--- target info ---")
+      common.DumpInfoDict(OPTIONS.info_dict)
+
+      if OPTIONS.incremental_source is not None:
+        print("--- source info ---")
+        common.DumpInfoDict(OPTIONS.source_info_dict)
+
+    WriteABOTAPackageWithBrilloScript(
+        target_file=args[0],
+        output_file=args[1],
+        source_file=OPTIONS.incremental_source)
+
+    print("done.")
+    return
 
   if OPTIONS.extra_script is not None:
     OPTIONS.extra_script = open(OPTIONS.extra_script).read()

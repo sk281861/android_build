@@ -1040,6 +1040,7 @@ class PasswordManager(object):
   def __init__(self):
     self.editor = os.getenv("EDITOR", None)
     self.pwfile = os.getenv("ANDROID_PW_FILE", None)
+    self.secure_storage_cmd = os.getenv("ANDROID_SECURE_STORAGE_CMD", None)
 
   def GetPasswords(self, items):
     """Get passwords corresponding to each string in 'items',
@@ -1059,9 +1060,23 @@ class PasswordManager(object):
       missing = []
       for i in items:
         if i not in current or not current[i]:
-          missing.append(i)
+          #Attempt to load using ANDROID_SECURE_STORAGE_CMD
+          if self.secure_storage_cmd:
+            try:
+              os.environ["TMP__KEY_FILE_NAME"] = str(i)
+              ps = subprocess.Popen(self.secure_storage_cmd, shell=True, stdout=subprocess.PIPE)
+              output = ps.communicate()[0]
+              if ps.returncode == 0:
+                current[i] = output
+            except Exception as e:
+              print(e)
+              pass
+          if i not in current or not current[i]:
+            missing.append(i)
       # Are all the passwords already in the file?
       if not missing:
+        if "ANDROID_SECURE_STORAGE_CMD" in os.environ:
+          del os.environ["ANDROID_SECURE_STORAGE_CMD"]
         return current
 
       for i in missing:
@@ -1764,14 +1779,18 @@ def MakeRecoveryPatch(input_dir, output_sink, recovery_img, boot_img,
 
   full_recovery_image = info_dict.get("full_recovery_image", None) == "true"
   system_root_image = info_dict.get("system_root_image", None) == "true"
+  use_bsdiff = info_dict.get("no_gzip_recovery_ramdisk", None) == "true"
 
   if full_recovery_image:
     output_sink("etc/recovery.img", recovery_img.data)
 
   else:
-    diff_program = ["imgdiff"]
+    if use_bsdiff:
+      diff_program = ["bsdiff"]
+    else:
+      diff_program = ["imgdiff"]
     path = os.path.join(input_dir, "SYSTEM", "etc", "recovery-resource.dat")
-    if os.path.exists(path):
+    if os.path.exists(path) and not use_bsdiff:
       diff_program.append("-b")
       diff_program.append(path)
       bonus_args = "-b /system/etc/recovery-resource.dat"
