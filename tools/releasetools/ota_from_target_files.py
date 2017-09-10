@@ -2016,17 +2016,17 @@ def main(argv):
     common.Usage(__doc__)
     sys.exit(1)
 
-  if OPTIONS.downgrade:
+  #if OPTIONS.downgrade:
     # Sanity check to enforce a data wipe.
-    if not OPTIONS.wipe_user_data:
-      raise ValueError("Cannot downgrade without a data wipe")
+    #if not OPTIONS.wipe_user_data:
+      #raise ValueError("Cannot downgrade without a data wipe")
 
     # We should only allow downgrading incrementals (as opposed to full).
     # Otherwise the device may go back from arbitrary build with this full
     # OTA package.
-    if OPTIONS.incremental_source is None:
-      raise ValueError("Cannot generate downgradable full OTAs - consider"
-                       "using --omit_prereq?")
+    #if OPTIONS.incremental_source is None:
+      #raise ValueError("Cannot generate downgradable full OTAs - consider"
+                       #"using --omit_prereq?")
 
   # Load the dict file from the zip directly to have a peek at the OTA type.
   # For packages using A/B update, unzipping is not needed.
