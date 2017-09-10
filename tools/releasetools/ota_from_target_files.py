@@ -1154,7 +1154,7 @@ endif;
   #if OPTIONS.downgrade:
     #script.AddToZip(source_zip, output_zip, input_path=OPTIONS.updater_binary)
   #else:
-    script.AddToZip(target_zip, output_zip, input_path=OPTIONS.updater_binary)
+  script.AddToZip(target_zip, output_zip, input_path=OPTIONS.updater_binary)
   metadata["ota-required-cache"] = str(script.required_cache)
   WriteMetadata(metadata, output_zip)
 
