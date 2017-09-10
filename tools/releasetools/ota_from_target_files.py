@@ -1151,9 +1151,9 @@ endif;
   script.SetProgress(1)
   # For downgrade OTAs, we prefer to use the update-binary in the source
   # build that is actually newer than the one in the target build.
-  if OPTIONS.downgrade:
-    script.AddToZip(source_zip, output_zip, input_path=OPTIONS.updater_binary)
-  else:
+  #if OPTIONS.downgrade:
+    #script.AddToZip(source_zip, output_zip, input_path=OPTIONS.updater_binary)
+  #else:
     script.AddToZip(target_zip, output_zip, input_path=OPTIONS.updater_binary)
   metadata["ota-required-cache"] = str(script.required_cache)
   WriteMetadata(metadata, output_zip)
