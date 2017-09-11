@@ -540,6 +540,10 @@ else
 $(LOCAL_BUILT_MODULE) : $(all_res_assets) $(full_android_manifest) $(AAPT)
 endif
 	@echo "target Package: $(PRIVATE_MODULE) ($@)"
+ifneq ($(NO_SQUISHER),true)
+	@echo "Optimizing PNGs to shrink APK size"
+	$(hide) $(SQUISHER_SCRIPT) $(PRIVATE_RES_OUT)
+endif
 ifdef LOCAL_USE_AAPT2
 ifdef LOCAL_JACK_ENABLED
 	$(call copy-file-to-new-target)
