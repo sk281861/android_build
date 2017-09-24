@@ -2214,15 +2214,15 @@ endif
 endif
 
 ifeq ($(TARGET_OTA_ASSERT_DEVICE),)
-    OTA_SCRIPT_OVERRIDE_DEVICE := auto
+    $(INTERNAL_OTA_PACKAGE_TARGET): override_device := auto
 else
-    OTA_SCRIPT_OVERRIDE_DEVICE := $(TARGET_OTA_ASSERT_DEVICE)
+    $(INTERNAL_OTA_PACKAGE_TARGET): override_device := $(TARGET_OTA_ASSERT_DEVICE)
 endif
 
 ifneq ($(TARGET_UNIFIED_DEVICE),)
-    OTA_SCRIPT_OVERRIDE_PROP := true
+    $(INTERNAL_OTA_PACKAGE_TARGET): override_prop := --override_prop=true
     ifeq ($(TARGET_OTA_ASSERT_DEVICE),)
-        OTA_SCRIPT_OVERRIDE_DEVICE := $(TARGET_DEVICE)
+        $(INTERNAL_OTA_PACKAGE_TARGET): override_device := $(TARGET_DEVICE)
     endif
 endif
 
@@ -2232,6 +2232,7 @@ endif
 
 $(INTERNAL_OTA_PACKAGE_TARGET): $(BUILT_TARGET_FILES_PACKAGE)
 	@echo "$(OTA_FROM_TARGET_SCRIPT)" > $(PRODUCT_OUT)/ota_script_path
+	@echo "$(override_device)" > $(PRODUCT_OUT)/ota_override_device
 	@echo -e ${CL_PFX}"Package OTA:"${CL_RST}" $@"
 
 $(INTERNAL_OTA_PACKAGE_TARGET): $(BUILT_TARGET_FILES_PACKAGE)
@@ -2243,6 +2244,9 @@ $(INTERNAL_OTA_PACKAGE_TARGET): $(BUILT_TARGET_FILES_PACKAGE)
 	   -k $(KEY_CERT_PAIR) \
 	   $(extra_ota_args) \
 	   --backup=$(backuptool) \
+	   --override_device=$(override_device) $(override_prop) \
+	   $(extra_ota_args) \
+	   --override_device=$(override_device) \
 	   $(if $(OEM_OTA_CONFIG), -o $(OEM_OTA_CONFIG)) \
 	   $(BUILT_TARGET_FILES_PACKAGE) $@
 

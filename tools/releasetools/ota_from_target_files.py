@@ -94,12 +94,19 @@ Usage:  ota_from_target_files [flags] input_target_files output_ota_package
       Enable or disable the execution of backuptool.sh.
       Disabled by default.
 
+  --override_device <device>
+      Override device-specific asserts. Can be a comma-separated list.
+
+  --override_prop <boolean>
+      Override build.prop items with custom vendor init.
+      Enabled when TARGET_UNIFIED_DEVICE is defined in BoardConfig
+
   --log_diff <file>
       Generate a log file that shows the differences in the source and target
       builds for an incremental package. This option is only meaningful when
       -i is specified.
 
-]  --payload_signer <signer>
+  --payload_signer <signer>
       Specify the signer when signing the payload and metadata for A/B OTAs.
       By default (i.e. without this flag), it calls 'openssl pkeyutl' to sign
       with the package private key. If the private key cannot be accessed
@@ -1977,6 +1984,10 @@ def main(argv):
       OPTIONS.log_diff = a
     elif o in ("--backup",):
       OPTIONS.backuptool = bool(a.lower() == 'true')
+    elif o in ("--override_device",):
+      OPTIONS.override_device = a
+    elif o in ("--override_prop",):
+      OPTIONS.override_prop = bool(a.lower() == 'true')
     elif o == "--payload_signer":
       OPTIONS.payload_signer = a
     elif o == "--payload_signer_args":
@@ -2008,6 +2019,8 @@ def main(argv):
                                  "gen_verify",
                                  "log_diff=",
                                  "backup=",
+                                 "override_device=",
+                                 "override_prop=",
                                  "payload_signer=",
                                  "payload_signer_args=",
                              ], extra_option_handler=option_handler)
