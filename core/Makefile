@@ -1971,8 +1971,6 @@ ifeq ($(build_ota_package),true)
 name := $(TARGET_PRODUCT)
 ifeq ($(TARGET_BUILD_TYPE),debug)
   name := $(name)_debug
-  # Assume non-release recoveries skip signature check
-  extra_ota_args := --no_signing
 endif
 name := $(name)-ota-$(FILE_NAME_TAG)
 
@@ -1986,12 +1984,9 @@ else
     OTA_FROM_TARGET_SCRIPT := $(TARGET_RELEASETOOL_OTA_FROM_TARGET_SCRIPT)
 endif
 
-ifeq ($(TARGET_OTA_ASSERT_DEVICE),)
-    $(INTERNAL_OTA_PACKAGE_TARGET): override_device := auto
+ifeq ($(WITH_GMS),true)
+    $(INTERNAL_OTA_PACKAGE_TARGET): backuptool := false
 else
-    $(INTERNAL_OTA_PACKAGE_TARGET): override_device := $(TARGET_OTA_ASSERT_DEVICE)
-endif
-
 ifneq ($(DU_BUILD),)
     $(INTERNAL_OTA_PACKAGE_TARGET): backuptool := true
 else
